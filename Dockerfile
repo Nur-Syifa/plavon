@@ -8,7 +8,7 @@ COPY package*.json ./
 RUN npm rebuild sqlite3 --build-from-source
 RUN npm install --production
 
-COPY .
+COPY . .
 
 EXPOSE 3000
 
