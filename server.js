@@ -67,6 +67,7 @@ app.use((err, req, res, next) => {
 // ==================== SERVER STARTUP ====================
 
 // Start server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('=================================');
   console.log('🚀 Server is running!');
