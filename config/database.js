@@ -9,7 +9,7 @@ const fs = require('fs');
 
 // Path ke file database. Pastiin folder 'database' ada
 const dbDir = path.join(__dirname, '../database');
-const dbPath = path.join(dbDir, 'products.db');
+const dbPath = path.join(dbDir, 'database.db');
 
 // Bikin folder database kalau belum ada
 if (!fs.existsSync(dbDir)){
