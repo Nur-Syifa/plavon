@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,  initial-scale=1.0" />
+  <title>PLAFON PVC BOJONEGORO - GUDANG AZYILA JAYA</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333333;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('images/toko1.jpg') no-repeat center center fixed;
+      background-size: cover;
+      filter: blur(5px);
+      z-index: -1;
+    }
+    header {
+      background: #f7ce04;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    nav a {
+      text-decoration: none;
+      color: #130000;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    /* Cart Icon */
+    .cart-icon {
+      position: relative;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cart-icon:hover {
+      background: rgba(0,0,0,0.1);
+    }
+    .cart-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: #130000;
+    }
+    .cart-count {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: #ff0000;
+      color: white;
+      border-radius: 50%;
+      min-width: 20px;
+      height: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-sizing: border-box;
+      border: 2px solid #f7ce04;
+    }
+    /* Cart Sidebar */
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      max-width: 90vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+      z-index: 2000;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .cart-sidebar.open {
+      right: 0;
+    }
+    .cart-header {
+      padding: 20px;
+      background: #f7ce04;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-header h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #130000;
+    }
+    .cart-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #130000;
+    }
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+    .cart-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 15px;
+    }
+    .cart-item-details {
+      flex: 1;
+    }
+    .cart-item-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .cart-item-price {
+      color: #666;
+      font-size: 14px;
+    }
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qty-btn:hover {
+      background: #f7ce04;
+    }
+    .cart-item-qty {
+      font-weight: bold;
+      min-width: 30px;
+      text-align: center;
+    }
+    .remove-btn {
+      background: #ff0000;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .remove-btn:hover {
+      background: #cc0000;
+    }
+    .cart-footer {
+      padding: 20px;
+      border-top: 2px solid #eee;
+      background: #f9f9f9;
+    }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .cart-total-label {
+      color: #333;
+    }
+    .cart-total-amount {
+      color: #ff0000;
+    }
+    .checkout-btn {
+      width: 100%;
+      padding: 15px;
+      background: #32C03C;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .checkout-btn:hover {
+      background: #28a035;
+    }
+    .empty-cart {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    .empty-cart svg {
+      width: 60px;
+      height: 60px;
+      fill: #ddd;
+      margin-bottom: 15px;
+    }
+    .add-to-cart-btn {
+      background: #32C03C;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    .add-to-cart-btn:hover {
+      background: #28a035;
+    }
+    .cart-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1999;
+    }
+    .cart-overlay.active {
+      display: block;
+    }
+    .hero {
+      background: #ffd500d7;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      text-align: center;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: rgba(118, 117, 117, 0);
+      border-top-left-radius: 60% 40px;
+      border-top-right-radius: 60% 40px;
+    }
+    .hero h2 {
+      font-size: 36px;
+      margin: 0;
+    }
+    .catalog {
+      padding: 40px 24px;
+    }
+    .catalog h3 {
+      text-align: center;
+      margin-bottom: 32px;
+      font-size: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 16px;
+      text-align: center;
+    }
+    .card img {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .card h4 {
+      margin: 12px 0 8px;
+      font-size: 18px;
+      color: #000000;
+    }
+    .price {
+      color: #000000;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .specs {
+      font-size: 14px;
+      color: #555;
+    }
+    footer {
+      background: #333;
+      color: rgb(249, 11, 11);
+      padding: 24px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(255, 255, 0);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: rgba(219, 4, 4, 0.051);
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 1200px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .modal-card {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #f10b0b;
+    }
+    .modal-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .modal-card h4 {
+      margin: 8px 0 4px;
+      font-size: 16px;
+    }
+    .modal-card .price {
+      color: #FFD400;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .modal-card .specs {
+      font-size: 12px;
+      color: #666;
+    }
+    /* Hover effects for cards */
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    /* Testimonials Slideshow */
+    .testimonials {
+      padding: 40px 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      margin: 40px 0;
+    }
+    .testimonials h3 {
+      margin-bottom: 32px;
+      font-size: 28px;
+      color: #FFD400;
+    }
+    .slideshow-container {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .slide {
+      display: none;
+    }
+    .slide img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .slide.active {
+      display: block;
+    }
+    .prev, .next {
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      width: auto;
+      margin-top: -22px;
+      padding: 16px;
+      color: rgb(19, 18, 18);
+      font-weight: bold;
+      font-size: 18px;
+      transition: 0.6s ease;
+      border-radius: 0 3px 3px 0;
+      user-select: none;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .next {
+      right: 0;
+      border-radius: 3px 0 0 3px;
+    }
+    .prev:hover, .next:hover {
+      background-color: rgba(0,0,0,0.8);
+    }
+    .dots {
+      text-align: center;
+      padding: 20px;
+    }
+    .dot {
+      cursor: pointer;
+      height: 15px;
+      width: 15px;
+      margin: 0 2px;
+      background-color: #f00505;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.6s ease;
+    }
+    .active-dot, .dot:hover {
+      background-color: #FFD400;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      background: #f9f7f7;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .tab-button.active {
+      background: #FFD400;
+      color: #333;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div style="position:fixed;right:20px;bottom:20px;z-index:1000;">
+<a href="https://api.whatsapp.com/send?phone=082229401990&text=Halo" target="_blank">
+<button style="background:#32C03C;vertical-align:center;height:70px;width:70px;border-radius:50%;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all 0.3s ease;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+<img src="images/favicon.png" style="width:40px;height:40px;border-radius:50%;">
+</button></a>
+</div>
+
+    <header>
+    <div style="display: flex; align-items: center;">
+      <img src="images/logo.jpg" alt="Logo" style="height: 40px; margin-right: 16px;">
+      <h1>PLAFON PVC BOJONEGORO - GUDANG AZYILA JAYA</h1>
+    </div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#produk">Produk</a>
+      <a href="#">Testimoni Pembeli</a>
+      <a href="https://www.google.com/search?q=azyila+jaya+bojonegoro&rlz=1C1JJTC_idID1180ID1180&oq=azyila+jaya+bojonegoro&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTYDmcVEzKLbAqWEQ4iXCPYVshvCf5tW9zAQABjvBTYDmcVEzKLbAqWEQ4iXCPYVshvCf5tW9zAqMGo3qAIIsAIB8QU5hirWQIE3Fg&sourceid=chrome&ie=UTF-8&lqi=ChZhenlpbGEgamF5YSBib2pvbmVnb3JvSJ7WlJ-muYCACFoqEAAQARgAGAEYAiIWYXp5aWxhIGpheWEgYm9qb25lZ29ybyoGCAIQABABkgEPc2hvcHBpbmdfY2VudGVy#rlimm=16630131701317861690">Kontak</a>
+      <div class="cart-icon" onclick="toggleCart()">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        <div class="cart-count" id="cartCount">0</div>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h2><marquee behavior="scroll" direction="left">
+PLAFON PVC BOJONEGORO "GUDANG AZYLA JAYA"</marquee></h2>
+      <p>Pusat Plafon PVC Termurah</p>
+      <p>Melayani pemasangan flavon dan penjualan plafon PVC</p>
+      <h3 style="margin-bottom: 20px; color: #080808;">TENTANG KAMI</h3>
+      <p style="font-size: 18px; line-height: 1.6; color: rgb(192, 6, 6);">
+      <p>PLAFON PVC BOJONEGORO ZYLA JAYA adalah toko terpercaya di Bojonegoro yang menyediakan material bangunan berkualitas tinggi dengan harga terjangkau.</p>
+      <p>Kami unggul dalam pelayanan cepat, produk asli, dan solusi konstruksi yang inovatif untuk memenuhi kebutuhan proyek Anda.</p>
+      <p>Alamat: Jl. Veteran, Jambean, Sukorejo, Kec. Bojonegoro, Kabupaten Bojonegoro, Jawa Timur</p>
+      <p>kontak person "0822-2940-1990"</p>
+    </p>
+    </div>
+  </section>
+
+  
+  <section class="catalog" id="produk">
+  <h3>Katalog Produk</h3>
+  <div class="grid">
+    <!-- K.1 PREMIUM -->
+    <div class="card">
+      <img src="images/k1.PNG" alt="K.1 PREMIUM" width="218" height="208">
+      <h4>K.1 PREMIUM</h4>
+      <div class="price">Rp 45.000 / lembar</div>
+      <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+    </div>
+    <!-- K.2 SHAFON -->
+    <div class="card">
+      <img src="images/k2.jpg" alt="K.2 SHAFON" width="218" height="208">
+      <h4>K.2 SHAFON</h4>
+      <div class="price">Rp 42.000 / lembar</div>
+      <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+    </div>
+    <!-- K.3 -->
+    <div class="card">
+      <img src="images/k3.PNG" alt="K.3" width="218" height="208">
+      <h4>K.3 TITAN</h4>
+      <div class="price">Rp 38.000 / lembar</div>
+      <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+    </div>
+    <!-- K.4 ELEPHANT -->
+    <div class="card">
+      <img src="images/k4.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+      <h4>K.4 ELEPHANT</h4>
+      <div class="price">Rp 39.000 / lembar</div>
+      <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+    </div>
+    <!-- K.5 Gypsum Perforated -->
+    <div class="card">
+      <img src="images/GYPSUN.jpg" alt="CONTOH BARANG" width="218" height="208">
+      <h4>Panel Gypsum Perforated</h4>
+      <div class="price">Rp 110.000 / lembar</div>
+      <div class="specs">Akuistik baik • Desain modern • Untuk ruang kantor</div>
+    </div>
+    <!-- Paku Beton 3 inch -->
+    <div class="card">
+      <img src="images/BETON 3.jpg" alt="CONTOH BARANG" width="218" height="208">
+      <h4>WALL PANEL COMPASITE</h4>
+      <div class="price">Rp 35.000 / kg</div>
+      <div class="specs">Kuat dan tajam • Tahan karat • Untuk pemasangan beton</div>
+    </div>
+    <!-- Genteng Tanah Liat Merah -->
+    <div class="card">
+      <img src="images/LISTVIGURA2.jpg" alt="CONTOH BARANG" width="218" height="208">
+      <h4>LIST VIGURA</h4>
+      <div class="price">Rp 8.500 / buah</div>
+      <div class="specs">Tahan cuaca • Desain klasik • Umur panjang</div>
+    </div>
+    <!-- Triplek 9 mm -->
+    <div class="card">
+      <img src="images/LIST20.jpg" alt="CONTOH BARANG" width="218" height="208">
+      <h4>LIST PVC</h4>
+      <div class="price">Rp 75.000 / lembar</div>
+      <div class="specs">Kualitas kayu solid • Tahan air • Multi fungsi</div>
+    </div>
+  </div>
+    
+
+  <!-- Testimonials Section -->
+  <section class="testimonials">
+    <h3>Testimoni Pembeli</h3>
+    <div class="slideshow-container">
+      <div class="slide active">
+        <img src="images/pembeli.jpg" alt="Testimoni Pembeli 1">
+      </div>
+      <div class="slide">
+        <img src="images/pembeli1.jpg" alt="Testimoni Pembeli 2">
+      </div>
+      <div class="slide">
+        <img src="images/pembeli2.jpg" alt="Testimoni Pembeli 3">
+      </div>
+      <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+      <a class="next" onclick="changeSlide(1)">&#10095;</a>
+    </div>
+    <div class="dots">
+      <span class="dot active-dot" onclick="currentSlide(1)"></span>
+      <span class="dot" onclick="currentSlide(2)"></span>
+      <span class="dot" onclick="currentSlide(3)"></span>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 PLAFON PVC BOJONEGORO - GUDANG Azyla Jaya<br>
+    Alamat: Jl. Veteran, Jambean, Sukorejo, Kec. Bojonegoro, Kabupaten Bojonegoro, Jawa Timur Contact " 0822-2940-1990"<br>
+    @Powered by IZA SOIKHUL KASIFAH
+  </footer>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>Keranjang Belanja</h2>
+      <button class="cart-close" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+        </svg>
+        <p>Keranjang belanja Anda kosong</p>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span class="cart-total-label">Total:</span>
+        <span class="cart-total-amount" id="cartTotal">Rp 0</span>
+      </div>
+      <button class="checkout-btn" onclick="checkout()">
+        <svg style="width:20px;height:20px;fill:white;vertical-align:middle;margin-right:8px;" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Pesan via WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal for All Products -->
+  <div id="productsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Katalog Produk</h2>
+      <div class="tabs">
+        <button class="tab-button active" onclick="openTab('k1')">K.1 PREMIUM</button>
+        <button class="tab-button" onclick="openTab('k2')">K.2 SHAFON</button>
+        <button class="tab-button" onclick="openTab('k3')">K.3 TITAN</button>
+        <button class="tab-button" onclick="openTab('k4')">K.4 ELEPHANT</button>
+        <button class="tab-button" onclick="openTab('k4')">K.5 ROYALFON</button>
+        <button class="tab-button" onclick="openTab('all')">All Products</button>
+      </div>
+      <div id="k1" class="tab-content active">
+        <div class="modal-grid">
+          <div class="grid">
+            <div class="card">
+              <img src="images/K1/ED2046.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/ED2050.jpg.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/ED2051.jpg.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/EF2045.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/EF2046.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/EF2047.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/EF2050.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/K1/EF2052.jpg" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="k2" class="tab-content">
+        <div class="modal-grid">
+          <div class="grid">
+            <div class="card">
+              <img src="images/k2/1.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/2.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/3.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/4.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/5.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/6.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/Picture2.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/Picture2.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/10.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/11.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/13.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/16.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/14.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/k2/7.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="k3" class="tab-content">
+        <div class="modal-grid">
+          <div class="grid">
+            <div class="card">
+              <img src="images/k3/du.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/em.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/li.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/sa.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/1.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/2.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/3.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/4.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/5.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/6.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/7.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/8.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/9.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/k3/ti.jpg" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="k4" class="tab-content">
+        <div class="modal-grid">
+          <div class="grid">
+            <div class="card">
+              <img src="images/k4/1.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/2.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/3.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/4.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/5.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/6.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/7.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/8.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/k4/9.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="all" class="tab-content">
+        <div class="modal-grid">
+          <div class="grid">
+            <!-- K.1 PREMIUM -->
+            <div class="card">
+              <img src="images/k1.PNG" alt="K.1 PREMIUM" width="218" height="208">
+              <h5>K.1 PREMIUM</h5>
+              <div class="price">Rp 45.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu</div>
+            </div>
+            <!-- K.2 SHAFON -->
+            <div class="card">
+              <img src="images/k2.jpg" alt="K.2 SHAFON" width="218" height="208">
+              <h5>K.2 SHAFON</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab</div>
+            </div>
+            <!-- K.3 TITAN -->
+            <div class="card">
+              <img src="images/k3.PNG" alt="K.3 TITAN" width="218" height="208">
+              <h5>K.3 TITAN</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang</div>
+            </div>
+            <!-- K.4 ELEPHANT -->
+            <div class="card">
+              <img src="images/k4.jpg" alt="K.4 ELEPHANT" width="218" height="208">
+              <h5>K.4 ELEPHANT</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur</div>
+            </div>
+            <!-- Panel Gypsum Perforated -->
+            <div class="card">
+              <img src="images/product7.jpg" alt="Panel Gypsum Perforated" width="218" height="208">
+              <h5>Panel Gypsum Perforated</h5>
+              <div class="price">Rp 110.000 / lembar</div>
+              <div class="specs">Akuistik baik • Desain modern • Untuk ruang kantor</div>
+            </div>
+            <!-- WALL PANEL COMPASITE -->
+            <div class="card">
+              <img src="images/product8.jpg" alt="WALL PANEL COMPASITE" width="218" height="208">
+              <h5>WALL PANEL COMPASITE</h5>
+              <div class="price">Rp 35.000 / kg</div>
+              <div class="specs">Kuat dan tajam • Tahan karat • Untuk pemasangan beton</div>
+            </div>
+            <!-- LIST VIGURA -->
+            <div class="card">
+              <img src="images/product9.jpg" alt="LIST VIGURA" width="218" height="208">
+              <h5>LIST VIGURA</h5>
+              <div class="price">Rp 8.500 / buah</div>
+              <div class="specs">Tahan cuaca • Desain klasik • Umur panjang</div>
+            </div>
+            <!-- LIST PVC -->
+            <div class="card">
+              <img src="images/product10.jpg" alt="LIST PVC" width="218" height="208">
+              <h5>LIST PVC</h5>
+              <div class="price">Rp 75.000 / lembar</div>
+              <div class="specs">Kualitas kayu solid • Tahan air • Multi fungsi</div>
+            </div>
+            <!-- New Products from all folder -->
+            <div class="card">
+              <img src="images/all/1.jpg" alt="PVC Panel Design 1" width="218" height="208">
+              <h5>PVC Panel Design 1</h5>
+              <div class="price">Rp 40.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design unik • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/all/2.jpg" alt="PVC Panel Design 2" width="218" height="208">
+              <h5>PVC Panel Design 2</h5>
+              <div class="price">Rp 41.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif modern • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/all/3.jpg" alt="PVC Panel Design 3" width="218" height="208">
+              <h5>PVC Panel Design 3</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Finishing matte • Cocok untuk kamar</div>
+            </div>
+            <div class="card">
+              <img src="images/all/4.jpg" alt="PVC Panel Design 4" width="218" height="208">
+              <h5>PVC Panel Design 4</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Warna netral • Tahan cuaca</div>
+            </div>
+            <div class="card">
+              <img src="images/all/5.jpg" alt="PVC Panel Design 5" width="218" height="208">
+              <h5>PVC Panel Design 5</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Desain klasik • Ekonomis</div>
+            </div>
+            <div class="card">
+              <img src="images/all/6.jpg" alt="PVC Panel Design 6" width="218" height="208">
+              <h5>PVC Panel Design 6</h5>
+              <div class="price">Rp 43.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif abstrak • Premium quality</div>
+            </div>
+            <div class="card">
+              <img src="images/all/7.jpg" alt="PVC Panel Design 7" width="218" height="208">
+              <h5>PVC Panel Design 7</h5>
+              <div class="price">Rp 40.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing glossy • Ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/all/8.jpg" alt="PVC Panel Design 8" width="218" height="208">
+              <h5>PVC Panel Design 8</h5>
+              <div class="price">Rp 39.500 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna pastel • Mudah bersih</div>
+            </div>
+            <div class="card">
+              <img src="images/all/9.jpg" alt="PVC Panel Design 9" width="218" height="208">
+              <h5>PVC Panel Design 9</h5>
+              <div class="price">Rp 41.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Desain geometris • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/all/10.jpg" alt="PVC Panel Design 10" width="218" height="208">
+              <h5>PVC Panel Design 10</h5>
+              <div class="price">Rp 38.500 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Motif floral • Cocok dapur</div>
+            </div>
+            <div class="card">
+              <img src="images/all/11.jpg" alt="PVC Panel Design 11" width="218" height="208">
+              <h5>PVC Panel Design 11</h5>
+              <div class="price">Rp 42.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Finishing satin • Premium</div>
+            </div>
+            <div class="card">
+              <img src="images/all/12.jpg" alt="PVC Panel Design 12" width="218" height="208">
+              <h5>PVC Panel Design 12</h5>
+              <div class="price">Rp 40.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Desain minimalis • Mudah instalasi</div>
+            </div>
+            <div class="card">
+              <img src="images/all/13.jpg" alt="PVC Panel Design 13" width="218" height="208">
+              <h5>PVC Panel Design 13</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Warna cerah • Ruang anak</div>
+            </div>
+            <div class="card">
+              <img src="images/all/14.jpg" alt="PVC Panel Design 14" width="218" height="208">
+              <h5>PVC Panel Design 14</h5>
+              <div class="price">Rp 41.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Motif vintage • Tahan lama</div>
+            </div>
+            <div class="card">
+              <img src="images/all/15.jpg" alt="PVC Panel Design 15" width="218" height="208">
+              <h5>PVC Panel Design 15</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Desain simpel • Ekonomis</div>
+            </div>
+            <div class="card">
+              <img src="images/all/a.jpg" alt="PVC Panel A" width="218" height="208">
+              <h5>PVC Panel A</h5>
+              <div class="price">Rp 40.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design A • Tahan lembab</div>
+            </div>
+            <div class="card">
+              <img src="images/all/b.jpg" alt="PVC Panel B" width="218" height="208">
+              <h5>PVC Panel B</h5>
+              <div class="price">Rp 39.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Design B • Mudah dipasang</div>
+            </div>
+            <div class="card">
+              <img src="images/all/c.jpg" alt="PVC Panel C" width="218" height="208">
+              <h5>PVC Panel C</h5>
+              <div class="price">Rp 41.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design C • Finishing glossy</div>
+            </div>
+            <div class="card">
+              <img src="images/all/d.jpg" alt="PVC Panel D" width="218" height="208">
+              <h5>PVC Panel D</h5>
+              <div class="price">Rp 38.500 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Design D • Cocok ruang tamu</div>
+            </div>
+            <div class="card">
+              <img src="images/all/e.jpg" alt="PVC Panel E" width="218" height="208">
+              <h5>PVC Panel E</h5>
+              <div class="price">Rp 42.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design E • Premium quality</div>
+            </div>
+            <div class="card">
+              <img src="images/all/f.jpg" alt="PVC Panel F" width="218" height="208">
+              <h5>PVC Panel F</h5>
+              <div class="price">Rp 40.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design F • Tahan cuaca</div>
+            </div>
+            <div class="card">
+              <img src="images/all/g.jpg" alt="PVC Panel G" width="218" height="208">
+              <h5>PVC Panel G</h5>
+              <div class="price">Rp 39.500 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Design G • Mudah bersih</div>
+            </div>
+            <div class="card">
+              <img src="images/all/h.jpg" alt="PVC Panel H" width="218" height="208">
+              <h5>PVC Panel H</h5>
+              <div class="price">Rp 41.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design H • Desain modern</div>
+            </div>
+            <div class="card">
+              <img src="images/all/j.jpg" alt="PVC Panel J" width="218" height="208">
+              <h5>PVC Panel J</h5>
+              <div class="price">Rp 38.000 / lembar</div>
+              <div class="specs">Tebal 7 mm • Lebar 20 cm • Design J • Ekonomis</div>
+            </div>
+            <div class="card">
+              <img src="images/all/k.jpg" alt="PVC Panel K" width="218" height="208">
+              <h5>PVC Panel K</h5>
+              <div class="price">Rp 42.500 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design K • Finishing matte</div>
+            </div>
+            <div class="card">
+              <img src="images/all/l.jpg" alt="PVC Panel L" width="218" height="208">
+              <h5>PVC Panel L</h5>
+              <div class="price">Rp 40.000 / lembar</div>
+              <div class="specs">Tebal 8 mm • Lebar 20 cm • Design L • Tahan lama</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+            <!-- Tombol WhatsApp Mengambang (Floating) -->
+
+
+
+  <script>
+    // Get modal
+    var modal = document.getElementById("productsModal");
+
+    // Get close button
+    var closeBtn = document.getElementsByClassName("close")[0];
+
+    // Add click event to catalog cards
+    var cards = document.getElementsByClassName("card");
+    for (var i = 0; i < 4; i++) { // Only first 4 cards are catalogs
+      cards[i].addEventListener('click', function() {
+        var tabId = 'k' + this.querySelector('h4').textContent.split(' ')[0].replace('K.', '');
+        openModal(tabId);
+      });
+    }
+
+    // Close modal when clicking close button
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    function openModal(tabName) {
+      modal.style.display = "flex";
+      openTab(tabName);
+    }
+
+    function openTab(tabName) {
+      var i, tabcontent, tabbuttons;
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tabbuttons = document.getElementsByClassName("tab-button");
+      for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      var activeButton = document.querySelector('[onclick="openTab(\'' + tabName + '\')"]');
+      if (activeButton) {
+        activeButton.className += " active";
+      }
+    }
+
+    // Testimonials Slideshow
+    var slideIndex = 1;
+    showSlides(slideIndex);
+
+    function changeSlide(n) {
+      showSlides(slideIndex += n);
+    }
+
+    function currentSlide(n) {
+      showSlides(slideIndex = n);
+    }
+
+    function showSlides(n) {
+      var i;
+      var slides = document.getElementsByClassName("slide");
+      var dots = document.getElementsByClassName("dot");
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+      }
+      for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active-dot", "");
+      }
+      slides[slideIndex-1].style.display = "block";
+      dots[slideIndex-1].className += " active-dot";
+    }
+
+    // Shopping Cart Functionality
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Initialize cart on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      renderCart();
+      updateCartCount();
+      addCartButtonsToProducts();
+    });
+
+    // Toggle cart sidebar
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      const overlay = document.getElementById('cartOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    // Add cart buttons to product cards
+    function addCartButtonsToProducts() {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (!card.querySelector('.add-to-cart-btn')) {
+          const titleElement = card.querySelector('h4') || card.querySelector('h5');
+          const priceElement = card.querySelector('.price');
+          const imgElement = card.querySelector('img');
+          
+          if (titleElement && priceElement && imgElement) {
+            const title = titleElement.textContent.trim();
+            const priceText = priceElement.textContent.trim();
+            const price = parseInt(priceText.replace(/[^0-9]/g, ''));
+            const image = imgElement.src;
+
+            const btn = document.createElement('button');
+            btn.className = 'add-to-cart-btn';
+            btn.textContent = '+ Tambah ke Keranjang';
+            btn.onclick = () => addToCart(title, price, image);
+            card.appendChild(btn);
+
+            // Remove click event for modal (only for first 4 cards)
+            if (card.querySelector('h4')) {
+              card.removeEventListener('click', null);
+              card.style.cursor = 'default';
+              card.onmouseover = null;
+              card.onmouseout = null;
+            }
+          }
+        }
+      });
+    }
+
+    // Add item to cart
+    function addToCart(title, price, image) {
+      const existingItem = cart.find(item => item.title === title);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          title: title,
+          price: price,
+          image: image,
+          quantity: 1
+        });
+      }
+      
+      saveCart();
+      renderCart();
+      updateCartCount();
+      
+      // Show notification
+      showNotification('Produk berhasil ditambahkan ke keranjang!');
+    }
+
+    // Remove item from cart
+    function removeFromCart(title) {
+      cart = cart.filter(item => item.title !== title);
+      saveCart();
+      renderCart();
+      updateCartCount();
+    }
+
+    // Update item quantity
+    function updateQuantity(title, change) {
+      const item = cart.find(item => item.title === title);
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+          removeFromCart(title);
+        } else {
+          saveCart();
+          renderCart();
+          updateCartCount();
+        }
+      }
+    }
+
+    // Save cart to localStorage
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Render cart items
+    function renderCart() {
+      const cartItemsContainer = document.getElementById('cartItems');
+      const cartTotalElement = document.getElementById('cartTotal');
+      
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+          <div class="empty-cart">
+            <svg viewBox="0 0 24 24">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+            <p>Keranjang belanja Anda kosong</p>
+          </div>
+        `;
+        cartTotalElement.textContent = 'Rp 0';
+        return;
+      }
+
+      let cartHTML = '';
+      let total = 0;
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        cartHTML += `
+          <div class="cart-item">
+            <img src="${item.image}" alt="${item.title}">
+            <div class="cart-item-details">
+              <div class="cart-item-title">${item.title}</div>
+              <div class="cart-item-price">Rp ${item.price.toLocaleString('id-ID')}</div>
+            </div>
+            <div class="cart-item-controls">
+              <button class="qty-btn" onclick="updateQuantity('${item.title}', -1)">-</button>
+              <span class="cart-item-qty">${item.quantity}</span>
+              <button class="qty-btn" onclick="updateQuantity('${item.title}', 1)">+</button>
+              <button class="remove-btn" onclick="removeFromCart('${item.title}')">Hapus</button>
+            </div>
+          </div>
+        `;
+      });
+
+      cartItemsContainer.innerHTML = cartHTML;
+      cartTotalElement.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    // Update cart count badge
+    function updateCartCount() {
+      const cartCount = document.getElementById('cartCount');
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.textContent = totalItems;
+    }
+
+    // Show notification
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #32C03C;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 3000;
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    }
+
+    // Checkout via WhatsApp
+    function checkout() {
+      if (cart.length === 0) {
+        showNotification('Keranjang belanja kosong!');
+        return;
+      }
+
+      let message = 'Halo, saya ingin memesan:\n\n';
+      let total = 0;
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        message += `- ${item.title} (${item.quantity}x) = Rp ${itemTotal.toLocaleString('id-ID')}\n`;
+      });
+
+      message += `\nTotal: Rp ${total.toLocaleString('id-ID')}\n\nMohon info selanjutnya.`;
+
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=6282229401990&text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

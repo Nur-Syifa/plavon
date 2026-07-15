@@ -1,0 +1,6 @@
+- [x] Add SheetJS library script in the head section
+- [x] Add file input for Excel files and Apply button in the dashboard section
+- [x] Implement JavaScript function to parse Excel file and update dashboard data
+- [x] Update summary cards with calculated totals
+- [x] Repopulate the transaction table with Excel data
+- [x] Update the chart with top-selling items from Excel data
