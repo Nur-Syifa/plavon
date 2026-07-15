@@ -1,14 +1,9 @@
 /**
  * Database Initialization & Seeding
- * Pake better-sqlite3 biar anti gagal di Railway
+ * Versi better-sqlite3 untuk Railway
  */
 
-const Database = require('better-sqlite3');
-const path = require('path');
-
-// Pake path yg sama kayak config/database.js biar 1 file
-const dbPath = path.join(__dirname, '../database.db'); 
-const db = new Database(dbPath);
+const { db } = require('../config/database'); // PENTING: pake koneksi dari config
 
 console.log('Connected to SQLite database');
 initializeDatabase();
@@ -17,7 +12,7 @@ initializeDatabase();
  * Inisialisasi database: membuat tabel jika belum ada dan seeding data
  */
 function initializeDatabase() {
-  // better-sqlite3 itu synchronous, jadi gak perlu db.serialize
+  // better-sqlite3 itu sync, jadi pake exec langsung
   db.exec(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,13 +132,12 @@ function insertSampleProducts() {
 
   const insert = db.prepare(`
     INSERT INTO products (name, category, price, modal, specs, image)
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?) // <-- 6 tanda tanya buat 6 kolom
   `);
 
-  const insertMany = db.transaction((products) => {
-    for (const product of products) insert.run(product);
-  });
-  insertMany(sampleProducts);
+  for (const p of sampleProducts) {
+    insert.run(p.name, p.category, p.price, p.modal, p.specs, p.image);
+  }
 }
 
 /**
@@ -184,22 +178,24 @@ function migrateLegacyVariantSeedIfNeeded() {
  */
 function seedVariantsFromModalData(products) {
   const productIdMap = new Map(products.map((p) => [p.name, p.id]));
-  const variants = [ /* isi varian kamu yg panjang itu taruh di sini sama persis */ ];
+  const variants = [
+    // ... Tempel semua data varian kamu dari file lama ke sini ...
+    { productName: 'K.1 PREMIUM', category: 'k1', nama_varian: 'K.1 PREMIUM ED2046', harga: 45000, specs: 'Tebal 8 mm • Lebar 20 cm • Finishing glossy', image: '../images/K1/ED2046.jpg' },
+    { productName: 'K.1 PREMIUM', category: 'k1', nama_varian: 'K.1 PREMIUM ED2050', harga: 45000, specs: 'Tebal 8 mm • Lebar 20 cm • Finishing glossy', image: '../images/K1/ED2050.jpg' }, // udah aku benerin .jpg.jpg
+    // dst... copy semua sampe bawah
+  ];
 
   const insert = db.prepare(`
     INSERT INTO product_varian (product_id, category, nama_varian, harga, specs, image, is_active)
     VALUES (?, ?, ?, ?, ?, ?, 1)
   `);
 
-  const insertMany = db.transaction((data) => {
-    for (const v of data) {
-      insert.run(
-        productIdMap.get(v.productName) || null,
-        v.category, v.nama_varian, v.harga, v.specs, v.image
-      );
-    }
-  });
-  insertMany(variants);
+  for (const v of variants) {
+    insert.run(
+      productIdMap.get(v.productName) || null,
+      v.category, v.nama_varian, v.harga, v.specs, v.image
+    );
+  }
 }
 
 module.exports = db;
