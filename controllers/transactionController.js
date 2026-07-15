@@ -1,19 +1,14 @@
 /**
  * Transaction Controller
- * 
- * Menangani operasi terkait transaksi dan statistik penjualan.
- * Termasuk get transactions, summary, dan top selling items.
+ * Versi better-sqlite3
  */
 
 const { db } = require('../config/database');
 
 /**
- * Mengambil semua transaksi (legacy - sekarang menggunakan tabel pesanan)
- * Data diambil dari pesanan dan detail_pesanan dengan format kompatibel
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Mengambil semua transaksi
  */
-async function getTransactions(req, res) {
+function getTransactions(req, res) {
   try {
     const limit = parseInt(req.query.limit) || 100;
     const startDate = req.query.start_date;
@@ -39,7 +34,6 @@ async function getTransactions(req, res) {
 
     const params = [];
 
-    // Add date filter if provided
     if (startDate && endDate) {
       sql += ` AND DATE(p.created_at) BETWEEN ? AND ?`;
       params.push(startDate, endDate);
@@ -51,19 +45,12 @@ async function getTransactions(req, res) {
       params.push(endDate);
     }
 
-    sql += `
-      ORDER BY p.id DESC
-      LIMIT ?
-    `;
+    sql += ` ORDER BY p.id DESC LIMIT ?`;
     params.push(limit);
 
-    db.all(sql, params, (err, rows) => {
-      if (err) {
-        console.error('Error fetching transactions:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(rows);
-    });
+    const stmt = db.prepare(sql);
+    const rows = stmt.all(params); // <-- ganti db.all
+    res.json(rows);
   } catch (error) {
     console.error('Error in getTransactions:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -71,12 +58,9 @@ async function getTransactions(req, res) {
 }
 
 /**
- * Mengambil ringkasan transaksi (total penjualan, profit, dll)
- * Menggunakan tabel pesanan dan detail_pesanan
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Mengambil ringkasan transaksi
  */
-async function getTransactionsSummary(req, res) {
+function getTransactionsSummary(req, res) {
   try {
     const defaultSummary = {
       totalTransaksi: 0,
@@ -86,88 +70,53 @@ async function getTransactionsSummary(req, res) {
       totalProfit: 0
     };
 
-    // Helper functions untuk query database dengan Promise
-    const safeGet = (sql, params = []) => new Promise((resolve) => {
-      db.get(sql, params, (err, row) => {
-        if (err) {
-          resolve(null);
-          return;
-        }
-        resolve(row || null);
-      });
-    });
-
-    const safeAll = (sql, params = []) => new Promise((resolve) => {
-      db.all(sql, params, (err, rows) => {
-        if (err) {
-          resolve([]);
-          return;
-        }
-        resolve(rows || []);
-      });
-    });
-
     // Cek apakah tabel products memiliki kolom modal
-    db.all("PRAGMA table_info(products)", [], async (err, columns) => {
-      if (err) {
-        console.error('Error fetching transactions summary:', err.message);
-        return res.json(defaultSummary);
-      }
+    const columns = db.pragma('table_info(products)');
+    const hasModalColumn = columns.some((col) => col.name === 'modal');
 
-      const hasModalColumn = (columns || []).some((col) => col.name === 'modal');
+    // Ambil data ringkasan - langsung pake .get()
+    const totalTransaksiRow = db.prepare('SELECT COUNT(DISTINCT id) as totalTransaksi FROM pesanan').get();
+    const totalBarangTerjualRow = db.prepare('SELECT COALESCE(SUM(jumlah), 0) as totalBarangTerjual FROM detail_pesanan').get();
+    const totalPenjualanRow = db.prepare('SELECT COALESCE(SUM(total_harga), 0) as totalPenjualan FROM pesanan').get();
 
-      // Ambil data ringkasan
-      const totalTransaksiRow = await safeGet('SELECT COUNT(DISTINCT id) as totalTransaksi FROM pesanan');
-      const totalBarangTerjualRow = await safeGet('SELECT COALESCE(SUM(jumlah), 0) as totalBarangTerjual FROM detail_pesanan');
-      const totalPenjualanRow = await safeGet('SELECT COALESCE(SUM(total_harga), 0) as totalPenjualan FROM pesanan');
+    let totalModal = 0;
+    let totalProfit = 0;
 
-      let totalModal = 0;
-      let totalProfit = 0;
+    if (hasModalColumn) {
+      const totalModalRow = db.prepare(`
+        SELECT COALESCE(SUM(dp.jumlah * prod.modal), 0) as totalModal
+        FROM detail_pesanan dp
+        LEFT JOIN products prod ON dp.nama_produk = prod.name
+      `).get();
+      
+      const totalProfitRow = db.prepare(`
+        SELECT COALESCE(SUM(dp.jumlah * (dp.harga - COALESCE(prod.modal, 0))), 0) as totalProfit
+        FROM detail_pesanan dp
+        LEFT JOIN products prod ON dp.nama_produk = prod.name
+      `).get();
 
-      if (hasModalColumn) {
-        // Jika ada kolom modal, hitung menggunakan modal dari produk
-        const totalModalRow = await safeGet(`
-          SELECT COALESCE(SUM(dp.jumlah * prod.modal), 0) as totalModal
-          FROM detail_pesanan dp
-          LEFT JOIN products prod ON dp.nama_produk = prod.name
-        `);
-        const totalProfitRow = await safeGet(`
-          SELECT COALESCE(SUM(dp.jumlah * (dp.harga - COALESCE(prod.modal, 0))), 0) as totalProfit
-          FROM detail_pesanan dp
-          LEFT JOIN products prod ON dp.nama_produk = prod.name
-        `);
+      totalModal = totalModalRow?.totalModal || 0;
+      totalProfit = totalProfitRow?.totalProfit || 0;
+    } else {
+      const details = db.prepare('SELECT nama_produk, harga, jumlah FROM detail_pesanan WHERE nama_produk IS NOT NULL').all();
+      const products = db.prepare('SELECT name, COALESCE(price, 0) as price FROM products').all();
 
-        totalModal = totalModalRow?.totalModal || 0;
-        totalProfit = totalProfitRow?.totalProfit || 0;
-      } else {
-        // Jika tidak ada kolom modal, gunakan price sebagai modal
-        const details = await safeAll(`
-          SELECT nama_produk, harga, jumlah
-          FROM detail_pesanan
-          WHERE nama_produk IS NOT NULL
-        `);
-        const products = await safeAll(`
-          SELECT name, COALESCE(price, 0) as price
-          FROM products
-        `);
-
-        const productPriceMap = new Map(products.map((p) => [p.name, Number(p.price) || 0]));
-        details.forEach((d) => {
-          const qty = Number(d.jumlah) || 0;
-          const modalPerItem = productPriceMap.get(d.nama_produk) || 0;
-          const hargaJual = Number(d.harga) || 0;
-          totalModal += qty * modalPerItem;
-          totalProfit += qty * (hargaJual - modalPerItem);
-        });
-      }
-
-      res.json({
-        totalTransaksi: totalTransaksiRow?.totalTransaksi || 0,
-        totalBarangTerjual: totalBarangTerjualRow?.totalBarangTerjual || 0,
-        totalPenjualan: totalPenjualanRow?.totalPenjualan || 0,
-        totalModal,
-        totalProfit
+      const productPriceMap = new Map(products.map((p) => [p.name, Number(p.price) || 0]));
+      details.forEach((d) => {
+        const qty = Number(d.jumlah) || 0;
+        const modalPerItem = productPriceMap.get(d.nama_produk) || 0;
+        const hargaJual = Number(d.harga) || 0;
+        totalModal += qty * modalPerItem;
+        totalProfit += qty * (hargaJual - modalPerItem);
       });
+    }
+
+    res.json({
+      totalTransaksi: totalTransaksiRow?.totalTransaksi || 0,
+      totalBarangTerjual: totalBarangTerjualRow?.totalBarangTerjual || 0,
+      totalPenjualan: totalPenjualanRow?.totalPenjualan || 0,
+      totalModal,
+      totalProfit
     });
   } catch (error) {
     console.error('Error in getTransactionsSummary:', error);
@@ -176,11 +125,9 @@ async function getTransactionsSummary(req, res) {
 }
 
 /**
- * Mengambil barang terlaris berdasarkan jumlah terjual
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Mengambil barang terlaris
  */
-async function getTopItems(req, res) {
+function getTopItems(req, res) {
   try {
     const limit = parseInt(req.query.limit) || 10;
     
@@ -196,20 +143,15 @@ async function getTopItems(req, res) {
       LIMIT ?
     `;
     
-    db.all(sql, [limit], (err, rows) => {
-      if (err) {
-        console.error('Error fetching top items:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(rows);
-    });
+    const stmt = db.prepare(sql);
+    const rows = stmt.all(limit); // <-- ganti db.all
+    res.json(rows);
   } catch (error) {
     console.error('Error in getTopItems:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
 
-// Export semua fungsi controller
 module.exports = {
   getTransactions,
   getTransactionsSummary,
