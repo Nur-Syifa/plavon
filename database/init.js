@@ -137,7 +137,7 @@ function insertSampleProducts() {
 
   const insert = db.prepare(`
     INSERT INTO products (name, category, price, modal, specs, image)
-    VALUES (?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   const insertMany = db.transaction((products) => {
