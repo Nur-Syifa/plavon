@@ -1,12 +1,15 @@
-    FROM node:18-slim
+FROM node:18-slim
 
-    WORKDIR /app
+# Install tools buat build sqlite3
+RUN apt-get update && apt-get install -y python3 make g++
 
-    COPY package*.json ./
-    RUN npm install --production
+WORKDIR /app
 
-    COPY . .
+COPY package*.json ./
+RUN npm install --production
 
-    EXPOSE 3000
+COPY . .
 
-    CMD ["node", "server.js"]
+EXPOSE 3000
+
+CMD ["node", "server.js"]
