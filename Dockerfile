@@ -1,11 +1,11 @@
-FROM node:18-slim
+FROM node:18  # ganti dari slim ke full
 
 RUN apt-get update && apt-get install -y python3 make g++
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN rm -rf node_modules package-lock.json  # <--- TAMBAH INI
+RUN npm rebuild sqlite3 --build-from-source  # <--- PAKSA BUILD ULANG
 RUN npm install --production
 
 COPY . .
