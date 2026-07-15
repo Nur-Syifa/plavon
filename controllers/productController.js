@@ -1,8 +1,6 @@
 /**
  * Product Controller
- * 
- * Menangani semua operasi CRUD untuk produk dan varian produk.
- * Termasuk get, create, update, delete, dan filtering.
+ * Versi better-sqlite3
  */
 
 const { db } = require('../config/database');
@@ -10,10 +8,8 @@ const { validateProduct, isValidCategory, sanitizeString } = require('../utils/v
 
 /**
  * Mengambil semua produk dengan filter kategori opsional
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
  */
-async function getAllProducts(req, res) {
+function getAllProducts(req, res) {
   try {
     const category = req.query.category;
     
@@ -24,14 +20,12 @@ async function getAllProducts(req, res) {
       sql += ' WHERE category = ?';
       params.push(category);
     }
+    sql += ' ORDER BY id DESC';
     
-    db.all(sql, params, (err, rows) => {
-      if (err) {
-        console.error('Error fetching products:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(rows);
-    });
+    const stmt = db.prepare(sql);
+    const rows = stmt.all(params); // <-- ganti db.all
+    
+    res.json(rows);
   } catch (error) {
     console.error('Error in getAllProducts:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -40,25 +34,19 @@ async function getAllProducts(req, res) {
 
 /**
  * Mengambil produk berdasarkan ID
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
  */
-async function getProductById(req, res) {
+function getProductById(req, res) {
   try {
     const id = req.params.id;
     
-    db.get('SELECT * FROM products WHERE id = ?', [id], (err, row) => {
-      if (err) {
-        console.error('Error fetching product:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      
-      if (!row) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-      
-      res.json(row);
-    });
+    const stmt = db.prepare('SELECT * FROM products WHERE id = ?');
+    const row = stmt.get(id); // <-- ganti db.get
+    
+    if (!row) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json(row);
   } catch (error) {
     console.error('Error in getProductById:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -67,23 +55,19 @@ async function getProductById(req, res) {
 
 /**
  * Membuat produk baru
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
  */
-async function createProduct(req, res) {
+function createProduct(req, res) {
   try {
     const { name, category, price, specs, image } = req.body;
     
-    // Sanitasi dan validasi input
     const sanitizedData = {
       name: sanitizeString(name || ''),
       category: sanitizeString(category || ''),
-      specs: sanitizeString(spec || ''),
+      specs: sanitizeString(specs || ''), // tadi typo: spec
       image: sanitizeString(image || ''),
       price: parseFloat(price) || 0
     };
     
-    // Gunakan validator
     const validation = validateProduct(sanitizedData);
     if (!validation.isValid) {
       return res.status(400).json({ 
@@ -92,7 +76,6 @@ async function createProduct(req, res) {
       });
     }
     
-    // Validasi kategori
     if (!isValidCategory(sanitizedData.category)) {
       return res.status(400).json({ 
         error: 'Kategori tidak valid',
@@ -100,31 +83,23 @@ async function createProduct(req, res) {
       });
     }
     
-    const sql = `
-      INSERT INTO products (name, category, price, specs, image)
-      VALUES (?, ?, ?, ?, ?)
-    `;
+    const stmt = db.prepare(`
+      INSERT INTO products (name, category, price, modal, specs, image)
+      VALUES (?, ?, ?)
+    `);
     
-    db.run(sql, [
+    const info = stmt.run( // <-- ganti db.run
       sanitizedData.name, 
       sanitizedData.category, 
-      sanitizedData.price, 
+      sanitizedData.price,
+      0, // modal default
       sanitizedData.specs, 
       sanitizedData.image
-    ], function(err) {
-      if (err) {
-        console.error('Error adding product:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      
-      res.status(201).json({
-        id: this.lastID,
-        name: sanitizedData.name,
-        category: sanitizedData.category,
-        price: sanitizedData.price,
-        specs: sanitizedData.specs,
-        image: sanitizedData.image
-      });
+    );
+    
+    res.status(201).json({
+      id: info.lastInsertRowid, // <-- ganti this.lastID
+      ...sanitizedData
     });
   } catch (error) {
     console.error('Error in createProduct:', error);
@@ -133,16 +108,13 @@ async function createProduct(req, res) {
 }
 
 /**
- * Update produk yang sudah ada
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Update produk
  */
-async function updateProduct(req, res) {
+function updateProduct(req, res) {
   try {
     const id = req.params.id;
     const { name, category, price, specs, image } = req.body;
     
-    // Sanitasi dan validasi input
     const sanitizedData = {
       name: sanitizeString(name || ''),
       category: sanitizeString(category || ''),
@@ -151,55 +123,27 @@ async function updateProduct(req, res) {
       price: parseFloat(price) || 0
     };
     
-    // Gunakan validator
     const validation = validateProduct(sanitizedData);
     if (!validation.isValid) {
-      return res.status(400).json({ 
-        error: 'Data produk tidak valid',
-        details: validation.errors 
-      });
+      return res.status(400).json({ error: 'Data produk tidak valid', details: validation.errors });
     }
     
-    // Validasi kategori
-    if (!isValidCategory(sanitizedData.category)) {
-      return res.status(400).json({ 
-        error: 'Kategori tidak valid',
-        validCategories: ['k1', 'k2', 'k3', 'k4', 'other']
-      });
-    }
-    
-    const sql = `
+    const stmt = db.prepare(`
       UPDATE products
       SET name = ?, category = ?, price = ?, specs = ?, image = ?
       WHERE id = ?
-    `;
+    `);
     
-    db.run(sql, [
-      sanitizedData.name, 
-      sanitizedData.category, 
-      sanitizedData.price, 
-      sanitizedData.specs, 
-      sanitizedData.image, 
-      id
-    ], function(err) {
-      if (err) {
-        console.error('Error updating product:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      
-      if (this.changes === 0) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-      
-      res.json({
-        id: parseInt(id),
-        name: sanitizedData.name,
-        category: sanitizedData.category,
-        price: sanitizedData.price,
-        specs: sanitizedData.specs,
-        image: sanitizedData.image
-      });
-    });
+    const info = stmt.run(
+      sanitizedData.name, sanitizedData.category, sanitizedData.price, 
+      sanitizedData.specs, sanitizedData.image, id
+    );
+    
+    if (info.changes === 0) { // <-- ganti this.changes
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json({ id: parseInt(id), ...sanitizedData });
   } catch (error) {
     console.error('Error in updateProduct:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -207,26 +151,20 @@ async function updateProduct(req, res) {
 }
 
 /**
- * Menghapus produk berdasarkan ID
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Hapus produk
  */
-async function deleteProduct(req, res) {
+function deleteProduct(req, res) {
   try {
     const id = req.params.id;
     
-    db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
-      if (err) {
-        console.error('Error deleting product:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      
-      if (this.changes === 0) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-      
-      res.json({ message: 'Product deleted successfully' });
-    });
+    const stmt = db.prepare('DELETE FROM products WHERE id = ?');
+    const info = stmt.run(id);
+    
+    if (info.changes === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error in deleteProduct:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -234,21 +172,14 @@ async function deleteProduct(req, res) {
 }
 
 /**
- * Mengambil semua kategori produk unik
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Ambil kategori unik
  */
-async function getCategories(req, res) {
+function getCategories(req, res) {
   try {
-    db.all('SELECT DISTINCT category FROM products', [], (err, rows) => {
-      if (err) {
-        console.error('Error fetching categories:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      
-      const categories = rows.map(row => row.category);
-      res.json(categories);
-    });
+    const stmt = db.prepare('SELECT DISTINCT category FROM products');
+    const rows = stmt.all();
+    const categories = rows.map(row => row.category);
+    res.json(categories);
   } catch (error) {
     console.error('Error in getCategories:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -256,12 +187,9 @@ async function getCategories(req, res) {
 }
 
 /**
- * Mengambil varian produk untuk modal "All Products"
- * Mendukung filter berdasarkan kategori
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * Ambil varian produk
  */
-async function getProductVariants(req, res) {
+function getProductVariants(req, res) {
   try {
     const category = req.query.category;
     let sql = `
@@ -275,23 +203,17 @@ async function getProductVariants(req, res) {
       sql += ' AND category = ?';
       params.push(category);
     }
-
     sql += ' ORDER BY category, nama_varian ASC';
 
-    db.all(sql, params, (err, rows) => {
-      if (err) {
-        console.error('Error fetching product variants:', err.message);
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(rows);
-    });
+    const stmt = db.prepare(sql);
+    const rows = stmt.all(params);
+    res.json(rows);
   } catch (error) {
     console.error('Error in getProductVariants:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
 
-// Export semua fungsi controller
 module.exports = {
   getAllProducts,
   getProductById,
