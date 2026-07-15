@@ -120,8 +120,8 @@ function checkAndInsertSampleProducts() {
  */
 function insertSampleProducts() {
   const sampleProducts = [
-    { name: 'K.1 PREMIUM', category: 'k1', price: 45000, modal: 38000, specs: 'Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu', image: 'public/images/K1.png' },
-    { name: 'K.2 SHAFON', category: 'k2', price: 42000, modal: 35000, specs: 'Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab', image: 'public/images/K2.jpg' },
+    { name: 'K.1 PREMIUM', category: 'k1', price: 45000, modal: 38000, specs: 'Tebal 8 mm • Lebar 20 cm • Finishing glossy • Cocok untuk ruang tamu', image: 'images/K1.png' },
+    { name: 'K.2 SHAFON', category: 'k2', price: 42000, modal: 35000, specs: 'Tebal 8 mm • Lebar 20 cm • Motif elegan • Tahan lembab', image: 'images/K2.jpg' },
     { name: 'K.3 TITAN', category: 'k3', price: 38000, modal: 32000, specs: 'Tebal 7 mm • Lebar 20 cm • Warna netral • Mudah dipasang', image: 'images/K3.png' },
     { name: 'K.4 ELEPHANT', category: 'k4', price: 39000, modal: 33000, specs: 'Tebal 7 mm • Lebar 20 cm • Motif batu alam • Cocok untuk dapur', image: 'images/K4.jpg' },
     { name: 'Panel Gypsum Perforated', category: 'other', price: 110000, modal: 95000, specs: 'Akuistik baik • Desain modern • Untuk ruang kantor', image: 'images/GYPSUN.jpg' },
