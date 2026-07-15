@@ -1,37 +1,35 @@
 /**
  * Database Configuration
- * 
- * Modul ini menangani koneksi database SQLite dan menyediakan
- * instance database untuk digunakan di seluruh aplikasi.
+ * Pake better-sqlite3
  */
 
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
-// Path ke file database
-const dbPath = path.join(__dirname, '../database', 'products.db');
+// Path ke file database. Pastiin folder 'database' ada
+const dbDir = path.join(__dirname, '../database');
+const dbPath = path.join(dbDir, 'products.db');
 
-// Buat koneksi database
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-    process.exit(1);
-  }
-  console.log('Connected to SQLite database at:', dbPath);
-});
+// Bikin folder database kalau belum ada
+if (!fs.existsSync(dbDir)){
+    fs.mkdirSync(dbDir);
+}
+
+// Buat koneksi database - langsung konek, gak pake callback
+const db = new Database(dbPath);
+
+console.log('Connected to SQLite database at:', dbPath);
+
+// Biar aman kalau ada banyak request
+db.pragma('journal_mode = WAL');
 
 /**
  * Menutup koneksi database dengan aman
- * Digunakan saat aplikasi shutdown
  */
 function closeDatabase() {
-  db.close((err) => {
-    if (err) {
-      console.error('Error closing database:', err.message);
-    } else {
-      console.log('Database connection closed successfully');
-    }
-  });
+  db.close();
+  console.log('Database connection closed successfully');
 }
 
 // Export database instance dan fungsi helper
