@@ -35,7 +35,7 @@ function createOrder(req, res) {
     // 1. Insert ke tabel pesanan
     const orderStmt = db.prepare(`
       INSERT INTO pesanan (no_nota, nama_pelanggan, alamat, telepon, total_harga, metode_pembayaran, status)
-      VALUES (?, ?, ?, ?, ?, ? 'pending')
+      VALUES (?, ?, ?, ?, ?, ?, 'pending')
     `);
     
     const info = orderStmt.run(
